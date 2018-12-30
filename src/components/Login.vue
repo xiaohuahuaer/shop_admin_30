@@ -6,7 +6,7 @@
         <el-input v-model="form.username" placeholder="请输入用户名"></el-input>
       </el-form-item>
       <el-form-item label="密码" prop="password">
-        <el-input v-model="form.password" placeholder="请输入密码" type="password"></el-input>
+        <el-input v-model="form.password" placeholder="请输入密码" type="password"  @keyup.enter.native="login"></el-input>
       </el-form-item>
 
       <el-form-item>
@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+// import axios from 'axios'
 export default {
   data() {
     return {
@@ -43,41 +43,34 @@ export default {
     reset() {
       this.$refs.form.resetFields()
     },
-    login() {
-      this.$refs.form.validate(valid => {
-        // console.log(valid)
-        // if (valid) {
-        //   alert('校验通过了')
-        // } else {
-        //   alert('校验失败了')
-        //   return false
-        // }
-        if (!valid) return false
-        axios({
+    async login() {
+      try {
+        await this.$refs.form.validate()
+        let res = await this.axios({
           method: 'post',
           url: 'http://localhost:8888/api/private/v1/login',
           data: this.form
-        }).then(res => {
-          console.log(res.data)
-          if (res.data.meta.status === 200) {
-            // alert('登录成功')
-            this.$message({
-              message: '登录成功了',
-              type: 'success',
-              duration: 1000
-            })
-            localStorage.setItem('token', res.data.data.token)
-
-            this.$router.push('/home')
-          } else {
-            // alert('登录失败')
-            this.$message({
-              message: res.data.meta.msg,
-              type: 'error'
-            })
-          }
         })
-      })
+        if (res.data.meta.status === 200) {
+          // alert('登录成功')
+          this.$message({
+            message: '登录成功了',
+            type: 'success',
+            duration: 1000
+          })
+          localStorage.setItem('token', res.data.data.token)
+
+          this.$router.push('/home')
+        } else {
+          // alert('登录失败')
+          this.$message({
+            message: res.data.meta.msg,
+            type: 'error'
+          })
+        }
+      } catch (e) {
+        return false
+      }
     }
   }
 }
