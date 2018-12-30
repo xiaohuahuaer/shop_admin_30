@@ -296,10 +296,6 @@ export default {
 </script>
 
 <style scoped>
-.el-breadcrumb {
-  height: 40px;
-  line-height: 40px;
-}
 .input-with-select {
   width: 300px;
   margin-bottom: 5px;
