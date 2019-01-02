@@ -50,7 +50,7 @@
         <template slot-scope="scope">
           <el-button @click="showEdit(scope.row)" type="primary" icon="el-icon-edit" size="mini" plain circle></el-button>
           <el-button @click="delUser(scope.row.id)" type="danger" icon="el-icon-delete" size="mini" plain circle></el-button>
-          <el-button type="success" icon="el-icon-check" size="mini" plain round>分配角色</el-button>
+          <el-button @click="showAssign(scope.row)" type="success" icon="el-icon-check" size="mini" plain round>分配角色</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -112,6 +112,32 @@
         <el-button type="primary" @click="updateUser">确 定</el-button>
       </span>
     </el-dialog>
+
+    <!-- 分配角色的模态框 -->
+    <el-dialog
+      title="分配角色"
+      :visible.sync="assignDialogVisible"
+      width="40%">
+      <el-form :model="assignForm" label-width="80px" :rules="rules" status-icon ref="assignForm">
+        <el-form-item label="用户名" prop="username">
+          <el-tag type="info">{{assignForm.username}}</el-tag>
+        </el-form-item>
+        <el-form-item label="角色列表" prop="roleList">
+          <el-select v-model="assignForm.rid" placeholder="请选择">
+            <el-option
+              v-for="item in roleList"
+              :key="item.id"
+              :label="item.roleName"
+              :value="item.id">
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="assignDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="assignRole">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -146,6 +172,9 @@ export default {
         ],
         mobile: [
           {pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur'}
+        ],
+        roleList: [
+          {required: true, message: '请分配角色', trigger: 'blur'}
         ]
       },
       editDialogVisible: false,
@@ -154,7 +183,14 @@ export default {
         mobile: '',
         id: '',
         username: ''
-      }
+      },
+      assignDialogVisible: false,
+      assignForm: {
+        id: '',
+        username: '',
+        rid: ''
+      },
+      roleList: []
       // baseURL: 'http://localhost:8888/api/private/v1/'
     }
   },
@@ -289,6 +325,42 @@ export default {
         }
       } catch (e) {
         return false
+      }
+    },
+    async getRid(id) {
+      let res = await this.axios.get(`users/${id}`)
+      if (res.data.meta.status === 200) {
+        let rid = res.data.data.rid
+        if (rid === -1) {
+          rid = ''
+        }
+        this.assignForm.rid = rid
+      }
+    },
+    async showAssign(user) {
+      this.assignDialogVisible = true
+      this.assignForm.id = user.id
+      this.assignForm.username = user.username
+      this.getRid(user.id)
+      this.assignForm.rid = user.rid
+      let res = await this.axios.get('roles')
+      if (res.data.meta.status === 200) {
+        this.roleList = res.data.data
+      }
+    },
+    async assignRole() {
+      let {id, rid} = this.assignForm
+      if (!rid) {
+        this.$message.error('请选择角色')
+        return
+      }
+      let res = await this.axios.put(`users/${id}/role`, {rid})
+      if (res.data.meta.status === 200) {
+        this.assignDialogVisible = false
+        this.getUserList()
+        this.$message.success('分配角色成功')
+      } else {
+        this.$message.error('分配角色失败')
       }
     }
   }
