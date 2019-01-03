@@ -5,6 +5,7 @@ import router from './router'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import '@/assets/base.css'
+import ElTreeGrid from 'element-tree-grid'
 
 import axios from 'axios'
 Vue.prototype.axios = axios
@@ -42,6 +43,9 @@ axios.interceptors.response.use(
 Vue.use(ElementUI)
 
 Vue.config.productionTip = false
+
+Vue.component('el-table-tree-column', ElTreeGrid)
+// ElTreeGrid.name = 'el-table-tree-column'
 
 /* eslint-disable no-new */
 new Vue({
