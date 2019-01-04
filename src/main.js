@@ -6,6 +6,12 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import '@/assets/base.css'
 import ElTreeGrid from 'element-tree-grid'
+import moment from 'moment'
+
+import VueQuillEditor from 'vue-quill-editor'
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
 
 import axios from 'axios'
 Vue.prototype.axios = axios
@@ -46,6 +52,12 @@ Vue.config.productionTip = false
 
 Vue.component('el-table-tree-column', ElTreeGrid)
 // ElTreeGrid.name = 'el-table-tree-column'
+
+Vue.filter('dateFilter', (input, format = 'YYYY-MM-DD HH:mm:ss') => {
+  return moment(input * 1000).format(format)
+})
+
+Vue.use(VueQuillEditor)
 
 /* eslint-disable no-new */
 new Vue({
